@@ -3,6 +3,7 @@ class Cliente {
   String nombre;
   String domicilio;
   String? ineTexto; // Número de clave de elector o nota de su identificación
+  String? ineImagenes; // <-- NUEVA PROPIEDAD: Rutas de las fotos separadas por comas
   double limiteCredito;
   double deudaActual;
   bool activo;
@@ -12,13 +13,14 @@ class Cliente {
     required this.nombre,
     required this.domicilio,
     this.ineTexto,
+    this.ineImagenes, // <-- SE AGREGA AL CONSTRUCTOR
     required this.limiteCredito,
     this.deudaActual = 0.0,
     this.activo = true,
   });
 
   // Lógica de Semáforo de Crédito para la interfaz
-  // 0 = Verde (Todo bien), 1 = Naranja (Cerca del límite, >80%), 2 = Rojo (Límite superado)
+  // 0 = Verde (Todo bien), 1 = Naranja (Cerca del límite, >=80%), 2 = Rojo (Límite superado)
   int get estadoSemaforo {
     if (limiteCredito <= 0) return 0;
     final porcentaje = deudaActual / limiteCredito;
@@ -35,6 +37,7 @@ class Cliente {
       'nombre': nombre,
       'domicilio': domicilio,
       'ine_texto': ineTexto,
+      'ine_imagenes': ineImagenes, // <-- SE MAPEA PARA SQLITE
       'limite_credito': limiteCredito,
       'deuda_actual': deudaActual,
       'activo': activo ? 1 : 0,
@@ -43,13 +46,15 @@ class Cliente {
 
   factory Cliente.fromMap(Map<String, dynamic> map) {
     return Cliente(
-      id: map['id'],
-      nombre: map['nombre'],
-      domicilio: map['domicilio'],
+      id: map['id'] != null ? map['id'] as int : null,
+      nombre: map['nombre'] ?? 'Sin Nombre',
+      domicilio: map['domicilio'] ?? 'Sin Domicilio',
       ineTexto: map['ine_texto'],
-      limiteCredito: (map['limite_credito'] as num).toDouble(),
-      deudaActual: (map['deuda_actual'] as num).toDouble(),
-      activo: map['activo'] == 1,
+      ineImagenes: map['ine_imagenes'], // <-- SE RECUPERA DE SQLITE
+      // Usamos num.toDouble() para garantizar compatibilidad con enteros y decimales en SQLite
+      limiteCredito: map['limite_credito'] != null ? (map['limite_credito'] as num).toDouble() : 10000.0,
+      deudaActual: map['deuda_actual'] != null ? (map['deuda_actual'] as num).toDouble() : 0.0,
+      activo: (map['activo'] as int?) != 0, // Si es 1 o null, se considera activo
     );
   }
 }

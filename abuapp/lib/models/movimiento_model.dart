@@ -1,7 +1,7 @@
 class MovimientoInventario {
   int? id;
   int productoId;
-  String tipoMovimiento; // 'ENTRADA' o 'MERMA'
+  String tipoMovimiento; // 'ENTRADA', 'MERMA', 'VENTA_CANCELADA'
   double cantidad;
   String? motivo;
   String fecha;
@@ -24,5 +24,17 @@ class MovimientoInventario {
       'motivo': motivo,
       'fecha': fecha,
     };
+  }
+
+  // NUEVO: CONVERTIR DE SQLITE A OBJETO DART
+  factory MovimientoInventario.fromMap(Map<String, dynamic> map) {
+    return MovimientoInventario(
+      id: map['id'] != null ? map['id'] as int : null,
+      productoId: map['producto_id'] as int,
+      tipoMovimiento: map['tipo_movimiento'] ?? 'ENTRADA',
+      cantidad: (map['cantidad'] as num).toDouble(),
+      motivo: map['motivo'],
+      fecha: map['fecha'] ?? '',
+    );
   }
 }
